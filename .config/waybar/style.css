@@ -8,32 +8,32 @@
 }
 
 window#waybar {
-    background: rgba(18, 18, 22, 0.82);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    background: rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(0, 0, 0, 0.1);
     border-radius: 20px;
-    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.16);
 }
 
 /* Tooltips */
 tooltip {
-    background: rgba(22, 22, 26, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 10px;
     padding: 8px 12px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
 }
 
 tooltip label {
-    color: #ffffff;
+    color: #11111b;
     font-size: 13px;
 }
 
 /* Clock */
 #clock {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 14px;
-    color: #ffffff;
+    color: #11111b;
     font-family: "Adwaita Mono", "DejaVu Sans Mono", monospace;
     font-weight: 700;
     font-size: 14px;
@@ -43,21 +43,21 @@ tooltip label {
 }
 
 #clock:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.1);
+    border-color: rgba(0, 0, 0, 0.15);
 }
 
 /* Workspaces */
 #workspaces {
-    background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.04);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 16px;
     padding: 6px 3px;
     margin: 6px;
 }
 
 #workspaces button {
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(0, 0, 0, 0.45);
     font-weight: 600;
     font-size: 13px;
     padding: 6px 0;
@@ -67,31 +67,31 @@ tooltip label {
 }
 
 #workspaces button:hover {
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.15);
+    color: #11111b;
+    background: rgba(0, 0, 0, 0.08);
 }
 
 #workspaces button.active {
-    color: #0e0e12;
-    background: #ffffff;
+    color: #ffffff;
+    background: #11111b;
     font-weight: 800;
     border-radius: 10px;
-    box-shadow: 0 2px 8px rgba(255, 255, 255, 0.25);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 #workspaces button.urgent {
     color: #ffffff;
-    background: #ff5555;
+    background: #d20f39;
 }
 
 /* Bottom Action Buttons */
 #pulseaudio,
 #custom-notifications,
 #custom-power {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-radius: 12px;
-    color: #ffffff;
+    color: #11111b;
     font-size: 15px;
     margin: 4px 6px;
     padding: 8px 0;
@@ -100,12 +100,13 @@ tooltip label {
 
 #pulseaudio:hover,
 #custom-notifications:hover {
-    background: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.25);
+    background: rgba(0, 0, 0, 0.12);
+    border-color: rgba(0, 0, 0, 0.18);
+    color: #000000;
 }
 
 #pulseaudio.muted {
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(0, 0, 0, 0.35);
 }
 
 #custom-power {
@@ -113,16 +114,16 @@ tooltip label {
 }
 
 #custom-power:hover {
-    background: #ffffff;
-    color: #0e0e12;
-    border-color: #ffffff;
-    box-shadow: 0 2px 10px rgba(255, 255, 255, 0.3);
+    background: #11111b;
+    color: #ffffff;
+    border-color: #11111b;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.25);
 }
 
 /* Tray */
 #tray {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.05);
     border-radius: 12px;
     margin: 4px 6px;
     padding: 6px 3px;
@@ -138,18 +139,18 @@ tooltip label {
 
 /* Power Menu Popup */
 menu {
-    background: rgba(20, 20, 24, 0.96);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.96);
+    border: 1px solid rgba(0, 0, 0, 0.12);
     border-radius: 14px;
     padding: 6px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.18);
 }
 
 menuitem {
     border-radius: 8px;
     padding: 8px 16px;
     margin: 2px 0px;
-    color: #ffffff;
+    color: #11111b;
     font-family: "Open Sans", "Adwaita Sans", "DejaVu Sans", sans-serif;
     font-size: 13px;
     font-weight: 600;
@@ -157,12 +158,12 @@ menuitem {
 }
 
 menuitem:hover {
-    background: #ffffff;
-    color: #0e0e12;
+    background: #11111b;
+    color: #ffffff;
 }
 
 menu separator {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(0, 0, 0, 0.08);
     min-height: 1px;
     margin: 4px 6px;
 }
