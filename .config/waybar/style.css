@@ -1,116 +1,174 @@
-@import "colors.css";
+@import "/home/ablag/.config/waybar/colors.css";
 
 * {
     border: none;
     border-radius: 0px;
-    font-family: "SF Pro Dispay", "JetBrainsMono Nerd Font Propo";
+    font-family: "Open Sans", "Adwaita Sans", "DejaVu Sans", "Symbols Nerd Font", sans-serif;
     padding: 0;
     margin: 0;
     min-width: 0px;
 }
 
 window#waybar {
-    background-color: alpha(@background, 0.8);
-    box-shadow: 0 10px 24px rgba(0,0,0,0.922);
+    background: alpha(@background, 0.78);
+    border: 1px solid alpha(@outline_variant, 0.35);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
+/* Tooltip */
 tooltip {
-    background: transparent;
-    border: 1px solid @primary;
-    border-radius: 3px;
+    background: alpha(@surface_container_highest, 0.95);
+    border: 1px solid alpha(@primary, 0.3);
+    border-radius: 12px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 
 tooltip label {
-    color: @on_background;
+    color: @on_surface;
+    font-size: 13px;
 }
 
+/* Clock */
+#clock {
+    background: alpha(@surface_container_low, 0.6);
+    border: 1px solid alpha(@outline_variant, 0.25);
+    border-radius: 16px;
+    padding: 8px 4px;
+    margin: 8px 6px 4px 6px;
+    color: @primary;
+    font-family: "Adwaita Mono", "DejaVu Sans Mono", monospace;
+    font-weight: 700;
+    font-size: 15px;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#clock:hover {
+    background: alpha(@surface_container, 0.85);
+    border-color: alpha(@primary, 0.5);
+    box-shadow: 0 0 12px alpha(@primary, 0.25);
+}
+
+/* Workspaces */
 #workspaces {
-    min-width: 0px;
-    margin: 14px;
-    transition: all 0.3s ease-in-out;
+    background: alpha(@surface_container_low, 0.6);
+    border: 1px solid alpha(@outline_variant, 0.25);
+    border-radius: 18px;
+    padding: 6px 4px;
+    margin: 6px;
 }
 
 #workspaces button {
     color: transparent;
-    background: linear-gradient(100deg, @surface_variant 0%, @surface_container 100%);
-    transition: all 0.3s ease-in-out;
-    min-width: 0;
-    margin: 5px 0;
+    background: alpha(@surface_variant, 0.6);
+    min-width: 8px;
+    min-height: 8px;
+    margin: 4px 0px;
     border-radius: 10px;
-}
-
-#workspaces button.active {
-    background: linear-gradient(100deg, @primary 0%, @tertiary 100%);
-    color: transparent;
-    transition: all 0.3s ease-in-out;
-    font-size: 13px;
-    border-radius: 10px;
-    min-height: 20px;
-    min-width: 20px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #workspaces button:hover {
-    background: linear-gradient(100deg, @tertiary 0%, @primary 100%);
-    color: transparent;
-    border-radius: 16px;
-    background-size: 400% 400%;
-    transition: all 0.3s ease-in-out;
+    background: alpha(@primary, 0.7);
+    min-height: 14px;
 }
 
-#clock {
+#workspaces button.active {
+    background: linear-gradient(180deg, @primary 0%, @tertiary 100%);
+    min-height: 24px;
+    border-radius: 10px;
+    box-shadow: 0 0 10px alpha(@primary, 0.45);
+}
+
+#workspaces button.urgent {
+    background: @error;
+    min-height: 16px;
+}
+
+/* Bottom module buttons */
+#pulseaudio,
+#custom-notifications,
+#custom-power {
+    background: alpha(@surface_container_low, 0.6);
+    border: 1px solid alpha(@outline_variant, 0.25);
+    border-radius: 14px;
+    margin: 4px 6px;
+    padding: 9px 0;
+    font-size: 15px;
+    color: @on_surface;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#pulseaudio:hover,
+#custom-notifications:hover {
+    background: alpha(@surface_container_highest, 0.85);
+    border-color: alpha(@primary, 0.5);
     color: @primary;
-    font-family: "PP Neue Machina";
-    font-weight: 600;
-    font-size: 28px;
-    margin: 8px 5px 1px 5px;
+    box-shadow: 0 0 10px alpha(@primary, 0.3);
 }
 
-#network, #custom-notifications, #pulseaudio, #custom-power {
-    background: @surface_container;
-    padding: 4px 12px;
-    border-radius: 5px;
-    margin: 5px;
-    font-weight: normal;
-    font-style: normal;
-    font-size: 16px;
+#pulseaudio.muted {
+    color: @error;
+    border-color: alpha(@error, 0.35);
+}
+
+#custom-power {
+    color: @primary;
+    margin-bottom: 8px;
 }
 
 #custom-power:hover {
-    background: @primary;
-    color: @on_primary;
+    background: alpha(@error_container, 0.7);
+    border-color: alpha(@error, 0.6);
+    color: @error;
+    box-shadow: 0 0 12px alpha(@error, 0.4);
 }
 
+/* Tray */
 #tray {
-    background: @surface;
-    margin: 5px;
-    border-radius: 28px;
-    padding: 0px 12px;
+    background: alpha(@surface_container_low, 0.5);
+    border: 1px solid alpha(@outline_variant, 0.2);
+    margin: 4px 6px;
+    border-radius: 14px;
+    padding: 6px 4px;
 }
 
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+}
+
+/* Popup menu */
 menu {
     background: alpha(@surface_container, 0.95);
-    border: 1px solid @primary;
-    border-radius: 8px;
-    padding: 4px;
+    border: 1px solid alpha(@primary, 0.35);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.6);
 }
 
 menuitem {
-    padding: 6px 12px;
+    border-radius: 8px;
+    padding: 8px 14px;
     margin: 2px 0px;
-    border-radius: 5px;
     color: @on_surface;
-    font-family: "SF Pro Display", "JetBrainsMono Nerd Font Propo", sans-serif;
+    font-family: "Open Sans", "Adwaita Sans", "DejaVu Sans", sans-serif;
     font-size: 13px;
+    font-weight: 500;
     transition: all 0.2s ease-in-out;
 }
 
 menuitem:hover {
-    background-color: @primary;
+    background: linear-gradient(135deg, @primary 0%, @primary_container 100%);
     color: @on_primary;
 }
 
 menu separator {
-    background: @surface_variant;
+    background: alpha(@outline_variant, 0.4);
     min-height: 1px;
+    margin: 4px 6px;
 }
-
