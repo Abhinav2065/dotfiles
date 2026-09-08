@@ -1,0 +1,25 @@
+# Logs and temp files
+*.log
+*.tmp
+*.bak
+*.swp
+*~
+
+# Caches
+*Cache*
+*cache*
+.cache/
+
+# System and OS files
+.DS_Store
+Thumbs.db
+.initial_startup_done
+
+# Package and build artifacts
+yay/
+pkg/
+src/
+*.pkg.tar.*
+
+# Node modules
+node_modules/

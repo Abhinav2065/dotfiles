@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <object class="GtkMenu" id="menu">
+    <child>
+      <object class="GtkMenuItem" id="poweroff">
+        <property name="label">⏻  Power Off</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="restart">
+        <property name="label">󰜉  Restart</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="separator"/>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="server-mode">
+        <property name="label">󰒋  Server Mode</property>
+      </object>
+    </child>
+  </object>
+</interface>
