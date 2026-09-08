@@ -1,7 +1,7 @@
 {
     "position": "right",
     "layer": "top",
-    "width": 48,
+    "width": 46,
     "margin-top": 8,
     "margin-bottom": 8,
     "margin-right": 8,
@@ -31,17 +31,17 @@
 
     "tray": {
         "orientation": "inherit",
-        "icon-size": 14,
-        "spacing": 8
+        "icon-size": 13,
+        "spacing": 6
     },
 
     "clock": {
         "format": "{:%H\n%M}",
         "interval": 1,
-        "tooltip-format": "<big>{:%Y %B %d}</big>\n<tt><small>{calendar}</small></tt>",
+        "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": {
             "format": {
-                "today": "<span color='#80d5d0'><b><u>{}</u></b></span>"
+                "today": "<span color='#ffffff'><b><u>{}</u></b></span>"
             }
         }
     },
