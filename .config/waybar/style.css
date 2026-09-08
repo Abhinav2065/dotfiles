@@ -30,9 +30,9 @@ tooltip label {
 #clock {
     background: transparent;
     color: #000000;
-    font-family: "Adwaita Mono", "DejaVu Sans Mono", monospace;
+    font-family: "JetBrainsMono Nerd Font Propo", "JetBrainsMono NFP", monospace;
     font-weight: 700;
-    font-size: 13px;
+    font-size: 14px;
     padding: 16px 0;
     margin: 0;
 }
