@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 # Kill any existing instances
-pkill -f wallpaper-pause-controller.py 2>/dev/null
+pkill -f wallpaper-pause-controller 2>/dev/null
 pkill -x mpvpaper 2>/dev/null
 pkill -x swww-daemon 2>/dev/null
 rm -f /tmp/mpvpaper.sock
