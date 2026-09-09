@@ -3,18 +3,18 @@ import sys
 import os
 import signal
 import datetime
-import calendar
+import calendar as py_calendar
 import nepali_datetime
 import gi
 
 gi.require_version('Gtk', '3.0')
 gi.require_version('Gdk', '3.0')
 gi.require_version('GtkLayerShell', '0.1')
-from gi.repository import Gtk, Gdk, GLib, GtkLayerShell
+from gi.repository import Gtk, Gdk, GtkLayerShell
 
 PID_FILE = "/tmp/waybar_calendar.pid"
 
-# Check toggle: if already running, kill the old process and exit
+# Toggle: if already open, close it
 if os.path.exists(PID_FILE):
     try:
         with open(PID_FILE, "r") as f:
@@ -43,7 +43,7 @@ signal.signal(signal.SIGINT, cleanup)
 signal.signal(signal.SIGTERM, cleanup)
 
 DEV_NUMS = str.maketrans("0123456789", "०१२३४५६७८९")
-def to_devanagari(n):
+def to_dev(n):
     return str(n).translate(DEV_NUMS)
 
 NEPALI_MONTHS_EN = [
@@ -56,196 +56,151 @@ NEPALI_MONTHS_NP = [
 ]
 
 DAYS_EN = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"]
-DAYS_NP = ["आइ", "सोम", "मङ्ग", "बुध", "बिही", "शुक्र", "शनि"]
+DAYS_NP = ["आइ", "सो", "मङ्", "बुध", "बिहि", "शुक्र", "शनि"]
 
-CSS_DATA = """
+MINIMAL_CSS = """
+* {
+    font-family: "JetBrainsMono Nerd Font Propo", "JetBrainsMono NFP", "DejaVu Sans Mono", monospace;
+    font-size: 12px;
+}
+
 window {
     background-color: transparent;
 }
 
-.calendar-card {
+.calendar-box {
     background-color: #ffffff;
     border: 1px solid rgba(0, 0, 0, 0.15);
-    border-radius: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-    padding: 18px;
-    min-width: 320px;
-}
-
-.time-label {
-    font-size: 26px;
-    font-weight: 900;
+    border-radius: 0px;
+    padding: 12px 14px;
     color: #000000;
-    font-family: "JetBrainsMono Nerd Font Propo", "JetBrainsMono NFP", monospace;
 }
 
-.date-label {
+.title-text {
     font-size: 12px;
-    font-weight: 600;
-    color: rgba(0, 0, 0, 0.55);
-}
-
-.toggle-container {
-    background-color: #f0f0f0;
-    border-radius: 8px;
-    padding: 2px;
-}
-
-.lang-btn {
-    border-radius: 6px;
-    padding: 4px 10px;
-    font-size: 11px;
     font-weight: 700;
-    color: rgba(0, 0, 0, 0.6);
-    background-color: transparent;
-    border: none;
-    transition: all 0.15s ease;
-}
-
-.lang-btn:hover {
+    letter-spacing: 0.5px;
     color: #000000;
 }
 
-.lang-btn.active {
-    background-color: #000000;
-    color: #ffffff;
-}
-
-.nav-bar {
-    margin-top: 14px;
+.sub-title {
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.45);
+    margin-top: 1px;
     margin-bottom: 8px;
 }
 
-.nav-title {
-    font-size: 14px;
+.mode-btn {
+    border: 1px solid transparent;
+    border-radius: 0px;
+    background: transparent;
+    padding: 1px 5px;
+    font-size: 10px;
+    font-weight: 600;
+    color: rgba(0, 0, 0, 0.4);
+}
+
+.mode-btn:hover {
+    color: #000000;
+}
+
+.mode-btn.active {
+    color: #000000;
     font-weight: 800;
-    color: #000000;
+    border-bottom: 2px solid #000000;
 }
 
-.nav-arrow {
-    background-color: #f5f5f5;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 6px;
-    color: #000000;
-    font-size: 15px;
+.mode-sep {
+    color: rgba(0, 0, 0, 0.2);
+    font-size: 10px;
+    padding: 0 2px;
+}
+
+.nav-btn {
+    border: none;
+    border-radius: 0px;
+    background: transparent;
+    color: rgba(0, 0, 0, 0.5);
+    font-size: 12px;
     font-weight: 700;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 2px 8px;
+    padding: 0 4px;
+    min-width: 16px;
+    min-height: 16px;
 }
 
-.nav-arrow:hover {
-    background-color: #000000;
-    color: #ffffff;
-}
-
-.today-btn {
-    background-color: #f5f5f5;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 6px;
+.nav-btn:hover {
     color: #000000;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.header-cell {
     font-size: 10px;
     font-weight: 700;
-    padding: 4px 8px;
-}
-
-.today-btn:hover {
-    background-color: #000000;
-    color: #ffffff;
-}
-
-.weekday-header {
-    font-size: 11px;
-    font-weight: 700;
-    color: rgba(0, 0, 0, 0.45);
-    padding: 6px 0;
-    min-width: 38px;
-}
-
-.weekday-header.sat {
-    color: #d20f39;
+    color: rgba(0, 0, 0, 0.35);
+    padding: 4px 0;
+    min-width: 28px;
 }
 
 .day-cell {
-    min-width: 38px;
-    min-height: 34px;
-    border-radius: 6px;
-    font-size: 12px;
-    font-weight: 600;
+    font-size: 11px;
+    font-weight: 500;
     color: #000000;
+    min-width: 28px;
+    min-height: 24px;
+    border-radius: 0px;
+    padding: 2px 0;
 }
 
 .day-cell:hover {
-    background-color: #f2f2f2;
+    background-color: rgba(0, 0, 0, 0.06);
 }
 
-.day-cell.other-month {
-    color: rgba(0, 0, 0, 0.22);
-}
-
-.day-cell.saturday {
-    color: #c02040;
-}
-
-.day-cell.other-month.saturday {
-    color: rgba(192, 32, 64, 0.25);
+.day-cell.dim {
+    color: rgba(0, 0, 0, 0.18);
 }
 
 .day-cell.today {
     background-color: #000000;
     color: #ffffff;
-    font-weight: 900;
-    border-radius: 8px;
+    font-weight: 800;
 }
 
 .day-cell.today:hover {
-    background-color: #262626;
+    background-color: #222222;
 }
 
-.footer-box {
-    margin-top: 14px;
-    padding-top: 10px;
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.footer-text {
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(0, 0, 0, 0.55);
+.divider {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    margin: 6px 0;
 }
 """
 
-class CalendarApp(Gtk.Window):
+class MinimalCalendar(Gtk.Window):
     def __init__(self):
         super().__init__()
-        self.mode = "EN"  # "EN" or "NP"
-        self.today_greg = datetime.date.today()
-        self.today_nep = nepali_datetime.date.today()
+        self.mode = "EN"
+        self.today_en = datetime.date.today()
+        self.today_np = nepali_datetime.date.today()
 
-        self.cur_greg_year = self.today_greg.year
-        self.cur_greg_month = self.today_greg.month
+        self.view_en_y = self.today_en.year
+        self.view_en_m = self.today_en.month
 
-        self.cur_nep_year = self.today_nep.year
-        self.cur_nep_month = self.today_nep.month
+        self.view_np_y = self.today_np.year
+        self.view_np_m = self.today_np.month
 
         self.setup_window()
         self.setup_css()
         self.build_ui()
-        self.update_calendar()
-
-        GLib.timeout_add_seconds(1, self.update_clock)
+        self.render()
 
     def setup_window(self):
         GtkLayerShell.init_for_window(self)
         GtkLayerShell.set_layer(self, GtkLayerShell.Layer.TOP)
-        # Fullscreen click catcher
         for edge in (GtkLayerShell.Edge.TOP, GtkLayerShell.Edge.BOTTOM,
                      GtkLayerShell.Edge.LEFT, GtkLayerShell.Edge.RIGHT):
             GtkLayerShell.set_anchor(self, edge, True)
-
         GtkLayerShell.set_keyboard_mode(self, GtkLayerShell.KeyboardMode.ON_DEMAND)
 
-        # Transparent window background
         screen = self.get_screen()
         visual = screen.get_rgba_visual()
         if visual:
@@ -255,331 +210,288 @@ class CalendarApp(Gtk.Window):
         self.connect("key-press-event", self.on_key_press)
 
     def setup_css(self):
-        css_provider = Gtk.CssProvider()
-        css_provider.load_from_data(CSS_DATA.encode())
+        provider = Gtk.CssProvider()
+        provider.load_from_data(MINIMAL_CSS.encode())
         screen = Gdk.Screen.get_default()
-        style_context = Gtk.StyleContext()
-        style_context.add_provider_for_screen(
-            screen, css_provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
+        Gtk.StyleContext.add_provider_for_screen(
+            screen, provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION
         )
 
     def on_key_press(self, widget, event):
-        if event.keyval == Gdk.KEY_Escape:
+        if event.keyval in (Gdk.KEY_Escape, Gdk.KEY_q):
             cleanup()
+            return True
+        elif event.keyval == Gdk.KEY_Left:
+            self.nav(-1)
+            return True
+        elif event.keyval == Gdk.KEY_Right:
+            self.nav(1)
+            return True
+        elif event.keyval in (Gdk.KEY_t, Gdk.KEY_T):
+            self.jump_today()
             return True
         return False
 
     def build_ui(self):
-        # Click outside dismisser
-        outer_event = Gtk.EventBox()
-        outer_event.connect("button-press-event", lambda *_: cleanup())
+        # Fullscreen click-catcher to dismiss
+        backdrop = Gtk.EventBox()
+        backdrop.connect("button-press-event", lambda *_: cleanup())
 
-        # Container positioning card at top-right
-        align_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
-        align_box.set_halign(Gtk.Align.END)
-        align_box.set_valign(Gtk.Align.START)
-        align_box.set_margin_top(10)
-        align_box.set_margin_end(48)  # 40px Waybar width + 8px gap
+        # Alignment container: top right beside waybar
+        align = Gtk.Box(orientation=Gtk.Orientation.VERTICAL)
+        align.set_halign(Gtk.Align.END)
+        align.set_valign(Gtk.Align.START)
+        align.set_margin_top(8)
+        align.set_margin_end(44)
 
-        # Prevent clicks inside card from closing
+        # Content card
         card_event = Gtk.EventBox()
         card_event.connect("button-press-event", lambda w, e: True)
 
-        self.card = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
-        self.card.get_style_context().add_class("calendar-card")
+        self.box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
+        self.box.get_style_context().add_class("calendar-box")
 
-        # Top Header (Time + Date + Lang Switcher)
-        header_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
+        # Row 1: Nav + Title + EN/NP Toggle
+        top_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
 
-        title_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        self.time_label = Gtk.Label()
-        self.time_label.set_xalign(0)
-        self.time_label.get_style_context().add_class("time-label")
+        btn_prev = Gtk.Button(label="<")
+        btn_prev.get_style_context().add_class("nav-btn")
+        btn_prev.connect("clicked", lambda *_: self.nav(-1))
 
-        self.date_label = Gtk.Label()
-        self.date_label.set_xalign(0)
-        self.date_label.get_style_context().add_class("date-label")
+        self.title_lbl = Gtk.Label()
+        self.title_lbl.get_style_context().add_class("title-text")
+        self.title_lbl.set_xalign(0)
 
-        title_box.pack_start(self.time_label, False, False, 0)
-        title_box.pack_start(self.date_label, False, False, 0)
-        header_box.pack_start(title_box, True, True, 0)
+        btn_next = Gtk.Button(label=">")
+        btn_next.get_style_context().add_class("nav-btn")
+        btn_next.connect("clicked", lambda *_: self.nav(1))
 
-        # Language Toggle Switcher (EN / NP)
-        toggle_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
-        toggle_box.get_style_context().add_class("toggle-container")
-        toggle_box.set_valign(Gtk.Align.CENTER)
+        top_row.pack_start(btn_prev, False, False, 0)
+        top_row.pack_start(self.title_lbl, False, False, 2)
+        top_row.pack_start(btn_next, False, False, 0)
+
+        # Mode switch (EN | NP)
+        mode_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=0)
+        mode_box.set_halign(Gtk.Align.END)
 
         self.btn_en = Gtk.Button(label="EN")
-        self.btn_en.get_style_context().add_class("lang-btn")
+        self.btn_en.get_style_context().add_class("mode-btn")
         self.btn_en.get_style_context().add_class("active")
-        self.btn_en.connect("clicked", lambda *_: self.switch_mode("EN"))
+        self.btn_en.connect("clicked", lambda *_: self.set_mode("EN"))
+
+        sep = Gtk.Label(label="/")
+        sep.get_style_context().add_class("mode-sep")
 
         self.btn_np = Gtk.Button(label="NP")
-        self.btn_np.get_style_context().add_class("lang-btn")
-        self.btn_np.connect("clicked", lambda *_: self.switch_mode("NP"))
+        self.btn_np.get_style_context().add_class("mode-btn")
+        self.btn_np.connect("clicked", lambda *_: self.set_mode("NP"))
 
-        toggle_box.pack_start(self.btn_en, False, False, 0)
-        toggle_box.pack_start(self.btn_np, False, False, 0)
-        header_box.pack_start(toggle_box, False, False, 0)
+        mode_box.pack_start(self.btn_en, False, False, 0)
+        mode_box.pack_start(sep, False, False, 0)
+        mode_box.pack_start(self.btn_np, False, False, 0)
 
-        self.card.pack_start(header_box, False, False, 0)
+        top_row.pack_end(mode_box, False, False, 0)
+        self.box.pack_start(top_row, False, False, 0)
 
-        # Navigation Bar (< Month Year Today >)
-        nav_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=6)
-        nav_box.get_style_context().add_class("nav-bar")
+        # Subtitle: Dual calendar info
+        self.sub_lbl = Gtk.Label()
+        self.sub_lbl.get_style_context().add_class("sub-title")
+        self.sub_lbl.set_xalign(0)
+        self.box.pack_start(self.sub_lbl, False, False, 0)
 
-        btn_prev = Gtk.Button(label="‹")
-        btn_prev.get_style_context().add_class("nav-arrow")
-        btn_prev.connect("clicked", lambda *_: self.navigate_month(-1))
+        # Weekdays header
+        self.header_row = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL, spacing=2)
+        self.header_lbls = []
+        for _ in range(7):
+            l = Gtk.Label()
+            l.get_style_context().add_class("header-cell")
+            l.set_xalign(0.5)
+            self.header_row.pack_start(l, True, True, 0)
+            self.header_lbls.append(l)
+        self.box.pack_start(self.header_row, False, False, 0)
 
-        self.nav_title = Gtk.Label()
-        self.nav_title.get_style_context().add_class("nav-title")
-        self.nav_title.set_xalign(0.5)
-
-        btn_today = Gtk.Button(label="Today")
-        btn_today.get_style_context().add_class("today-btn")
-        btn_today.connect("clicked", lambda *_: self.jump_today())
-
-        btn_next = Gtk.Button(label="›")
-        btn_next.get_style_context().add_class("nav-arrow")
-        btn_next.connect("clicked", lambda *_: self.navigate_month(1))
-
-        nav_box.pack_start(btn_prev, False, False, 0)
-        nav_box.pack_start(self.nav_title, True, True, 0)
-        nav_box.pack_start(btn_today, False, False, 0)
-        nav_box.pack_start(btn_next, False, False, 0)
-
-        self.card.pack_start(nav_box, False, False, 0)
-
-        # Days of Week Header
-        self.weekdays_box = Gtk.Box(orientation=Gtk.Orientation.HORIZONTAL)
-        self.weekday_labels = []
-        for i in range(7):
-            lbl = Gtk.Label()
-            lbl.get_style_context().add_class("weekday-header")
-            lbl.set_xalign(0.5)
-            if i == 6:  # Saturday
-                lbl.get_style_context().add_class("sat")
-            self.weekdays_box.pack_start(lbl, True, True, 0)
-            self.weekday_labels.append(lbl)
-
-        self.card.pack_start(self.weekdays_box, False, False, 0)
-
-        # Calendar Grid
+        # Days Grid
         self.grid = Gtk.Grid()
         self.grid.set_row_spacing(2)
         self.grid.set_column_spacing(2)
-        self.card.pack_start(self.grid, False, False, 4)
+        self.box.pack_start(self.grid, False, False, 0)
 
-        # Footer info (Dual Conversion)
-        footer_box = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=2)
-        footer_box.get_style_context().add_class("footer-box")
+        card_event.add(self.box)
+        align.pack_start(card_event, False, False, 0)
+        backdrop.add(align)
+        self.add(backdrop)
 
-        self.footer_label = Gtk.Label()
-        self.footer_label.set_xalign(0)
-        self.footer_label.set_use_markup(True)
-        self.footer_label.get_style_context().add_class("footer-text")
-        footer_box.pack_start(self.footer_label, False, False, 0)
-
-        self.card.pack_start(footer_box, False, False, 0)
-
-        card_event.add(self.card)
-        align_box.pack_start(card_event, False, False, 0)
-        outer_event.add(align_box)
-        self.add(outer_event)
-
-        self.update_clock()
-
-    def update_clock(self):
-        now = datetime.datetime.now()
-        self.time_label.set_text(now.strftime("%H:%M:%S"))
-
-        if self.mode == "EN":
-            self.date_label.set_text(self.today_greg.strftime("%A, %d %B %Y"))
-        else:
-            np_today_str = self.today_nep.strftime("%K %N %D, %G")
-            self.date_label.set_text(np_today_str)
-        return True
-
-    def switch_mode(self, mode):
-        if self.mode == mode:
+    def set_mode(self, m):
+        if self.mode == m:
             return
-        self.mode = mode
-        if mode == "EN":
+        self.mode = m
+        if m == "EN":
             self.btn_en.get_style_context().add_class("active")
             self.btn_np.get_style_context().remove_class("active")
         else:
             self.btn_np.get_style_context().add_class("active")
             self.btn_en.get_style_context().remove_class("active")
-        self.update_clock()
-        self.update_calendar()
+        self.render()
 
     def jump_today(self):
         if self.mode == "EN":
-            self.cur_greg_year = self.today_greg.year
-            self.cur_greg_month = self.today_greg.month
+            self.view_en_y = self.today_en.year
+            self.view_en_m = self.today_en.month
         else:
-            self.cur_nep_year = self.today_nep.year
-            self.cur_nep_month = self.today_nep.month
-        self.update_calendar()
+            self.view_np_y = self.today_np.year
+            self.view_np_m = self.today_np.month
+        self.render()
 
-    def navigate_month(self, step):
+    def nav(self, step):
         if self.mode == "EN":
-            m = self.cur_greg_month + step
-            y = self.cur_greg_year
+            m = self.view_en_m + step
+            y = self.view_en_y
             if m < 1:
                 m = 12
                 y -= 1
             elif m > 12:
                 m = 1
                 y += 1
-            self.cur_greg_month = m
-            self.cur_greg_year = y
+            self.view_en_m = m
+            self.view_en_y = y
         else:
-            m = self.cur_nep_month + step
-            y = self.cur_nep_year
+            m = self.view_np_m + step
+            y = self.view_np_y
             if m < 1:
                 m = 12
                 y -= 1
             elif m > 12:
                 m = 1
                 y += 1
-            self.cur_nep_month = m
-            self.cur_nep_year = y
-        self.update_calendar()
+            self.view_np_m = m
+            self.view_np_y = y
+        self.render()
 
-    def update_calendar(self):
-        # Clear grid
-        for child in self.grid.get_children():
-            self.grid.remove(child)
+    def render(self):
+        for ch in self.grid.get_children():
+            self.grid.remove(ch)
 
         if self.mode == "EN":
-            self.render_english_calendar()
+            self.render_en()
         else:
-            self.render_nepali_calendar()
-
+            self.render_np()
         self.show_all()
 
-    def render_english_calendar(self):
-        # Update weekday headers
-        for i, name in enumerate(DAYS_EN):
-            self.weekday_labels[i].set_text(name)
+    def render_en(self):
+        # Headers
+        for i, d in enumerate(DAYS_EN):
+            self.header_lbls[i].set_text(d)
 
         # Title
-        month_name = calendar.month_name[self.cur_greg_month]
-        self.nav_title.set_text(f"{month_name} {self.cur_greg_year}")
+        m_name = py_calendar.month_name[self.view_en_m]
+        self.title_lbl.set_text(f"{m_name.upper()} {self.view_en_y}")
 
-        cal = calendar.Calendar(firstweekday=6) # Sunday = 6
-        weeks = cal.monthdayscalendar(self.cur_greg_year, self.cur_greg_month)
+        # Subtitle
+        np_str = self.today_np.strftime("%K %N %D, %G")
+        self.sub_lbl.set_text(f"BS: {np_str}")
 
-        prev_y = self.cur_greg_year if self.cur_greg_month > 1 else self.cur_greg_year - 1
-        prev_m = self.cur_greg_month - 1 if self.cur_greg_month > 1 else 12
-        _, prev_days_in_m = calendar.monthrange(prev_y, prev_m)
+        cal = py_calendar.Calendar(firstweekday=6)  # Sun = 6
+        weeks = cal.monthdayscalendar(self.view_en_y, self.view_en_m)
 
-        grid_matrix = []
+        prev_y = self.view_en_y if self.view_en_m > 1 else self.view_en_y - 1
+        prev_m = self.view_en_m - 1 if self.view_en_m > 1 else 12
+        _, prev_days_count = py_calendar.monthrange(prev_y, prev_m)
+
+        matrix = []
         for w_idx, week in enumerate(weeks):
             row = []
             for d_idx, day in enumerate(week):
                 if day != 0:
-                    row.append({'day': day, 'current': True})
+                    row.append({'val': day, 'curr': True})
                 else:
                     if w_idx == 0:
-                        count_zeros = week.count(0)
-                        val = prev_days_in_m - count_zeros + d_idx + 1
-                        row.append({'day': val, 'current': False})
+                        zeros = week.count(0)
+                        v = prev_days_count - zeros + d_idx + 1
+                        row.append({'val': v, 'curr': False})
                     else:
-                        row.append({'day': 0, 'current': False})
-            grid_matrix.append(row)
+                        row.append({'val': 0, 'curr': False})
+            matrix.append(row)
 
-        next_val = 1
-        for row in grid_matrix:
+        next_d = 1
+        for row in matrix:
             for item in row:
-                if item['day'] == 0:
-                    item['day'] = next_val
-                    next_val += 1
+                if item['val'] == 0:
+                    item['val'] = next_d
+                    next_d += 1
 
-        for r_idx, row in enumerate(grid_matrix):
+        for r_idx, row in enumerate(matrix):
             for c_idx, item in enumerate(row):
-                lbl = Gtk.Label(label=str(item['day']))
-                lbl.set_xalign(0.5)
+                day_val = item['val']
+                lbl = Gtk.Label(label=f"{day_val:2d}")
                 lbl.get_style_context().add_class("day-cell")
-                if not item['current']:
-                    lbl.get_style_context().add_class("other-month")
-                if c_idx == 6:
-                    lbl.get_style_context().add_class("saturday")
-                if (item['current'] and
-                    item['day'] == self.today_greg.day and
-                    self.cur_greg_month == self.today_greg.month and
-                    self.cur_greg_year == self.today_greg.year):
+                lbl.set_xalign(0.5)
+                if not item['curr']:
+                    lbl.get_style_context().add_class("dim")
+                if (item['curr'] and
+                    day_val == self.today_en.day and
+                    self.view_en_m == self.today_en.month and
+                    self.view_en_y == self.today_en.year):
                     lbl.get_style_context().add_class("today")
                 self.grid.attach(lbl, c_idx, r_idx, 1, 1)
 
-        # Footer: Equivalent Nepali date
-        np_date = self.today_nep.strftime("%K %N %D, %G")
-        self.footer_label.set_markup(f"Nepali Date: <span foreground='#000000'><b>{np_date}</b></span>")
-
-    def render_nepali_calendar(self):
-        # Update weekday headers
-        for i, name in enumerate(DAYS_NP):
-            self.weekday_labels[i].set_text(name)
+    def render_np(self):
+        # Headers
+        for i, d in enumerate(DAYS_NP):
+            self.header_lbls[i].set_text(d)
 
         # Title
-        m_np = NEPALI_MONTHS_NP[self.cur_nep_month]
-        m_en = NEPALI_MONTHS_EN[self.cur_nep_month]
-        y_dev = to_devanagari(self.cur_nep_year)
-        self.nav_title.set_text(f"{m_np} {y_dev} ({m_en})")
+        m_np = NEPALI_MONTHS_NP[self.view_np_m]
+        m_en = NEPALI_MONTHS_EN[self.view_np_m]
+        y_dev = to_dev(self.view_np_y)
+        self.title_lbl.set_text(f"{m_np} {y_dev} ({m_en})")
 
-        total_days = nepali_datetime._days_in_month(self.cur_nep_year, self.cur_nep_month)
-        first_day = nepali_datetime.date(self.cur_nep_year, self.cur_nep_month, 1)
-        start_col = first_day.weekday() # 0=Sun, ..., 6=Sat
+        # Subtitle
+        en_str = self.today_en.strftime("%a, %d %b %Y")
+        self.sub_lbl.set_text(f"AD: {en_str}")
 
-        prev_y = self.cur_nep_year if self.cur_nep_month > 1 else self.cur_nep_year - 1
-        prev_m = self.cur_nep_month - 1 if self.cur_nep_month > 1 else 12
+        total_days = nepali_datetime._days_in_month(self.view_np_y, self.view_np_m)
+        first_day = nepali_datetime.date(self.view_np_y, self.view_np_m, 1)
+        start_col = first_day.weekday()  # 0=Sun ... 6=Sat
+
+        prev_y = self.view_np_y if self.view_np_m > 1 else self.view_np_y - 1
+        prev_m = self.view_np_m - 1 if self.view_np_m > 1 else 12
         prev_total = nepali_datetime._days_in_month(prev_y, prev_m)
 
-        grid_matrix = []
+        matrix = []
         week = []
-        # Leading padding
         for i in range(start_col):
-            week.append({'day': prev_total - start_col + 1 + i, 'current': False})
+            week.append({'val': prev_total - start_col + 1 + i, 'curr': False})
 
         for d in range(1, total_days + 1):
-            week.append({'day': d, 'current': True})
+            week.append({'val': d, 'curr': True})
             if len(week) == 7:
-                grid_matrix.append(week)
+                matrix.append(week)
                 week = []
 
         if week:
             next_d = 1
             while len(week) < 7:
-                week.append({'day': next_d, 'current': False})
+                week.append({'val': next_d, 'curr': False})
                 next_d += 1
-            grid_matrix.append(week)
+            matrix.append(week)
 
-        for r_idx, row in enumerate(grid_matrix):
+        for r_idx, row in enumerate(matrix):
             for c_idx, item in enumerate(row):
-                day_num = item['day']
-                day_str = to_devanagari(day_num)
-                lbl = Gtk.Label(label=day_str)
-                lbl.set_xalign(0.5)
+                day_val = item['val']
+                lbl = Gtk.Label(label=to_dev(day_val))
                 lbl.get_style_context().add_class("day-cell")
-                if not item['current']:
-                    lbl.get_style_context().add_class("other-month")
-                if c_idx == 6:
-                    lbl.get_style_context().add_class("saturday")
-                if (item['current'] and
-                    day_num == self.today_nep.day and
-                    self.cur_nep_month == self.today_nep.month and
-                    self.cur_nep_year == self.today_nep.year):
+                lbl.set_xalign(0.5)
+                if not item['curr']:
+                    lbl.get_style_context().add_class("dim")
+                if (item['curr'] and
+                    day_val == self.today_np.day and
+                    self.view_np_m == self.today_np.month and
+                    self.view_np_y == self.today_np.year):
                     lbl.get_style_context().add_class("today")
                 self.grid.attach(lbl, c_idx, r_idx, 1, 1)
 
-        # Footer: Equivalent English date
-        en_date = self.today_greg.strftime("%A, %d %B %Y")
-        self.footer_label.set_markup(f"English Date: <span foreground='#000000'><b>{en_date}</b></span>")
-
 def main():
-    app = CalendarApp()
+    app = MinimalCalendar()
     app.show_all()
     Gtk.main()
 
