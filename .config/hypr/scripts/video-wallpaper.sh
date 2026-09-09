@@ -12,8 +12,8 @@ if [ ! -f "$WALLPAPER" ]; then
     WALLPAPER="$HOME/Downloads/mandelbrot_infinite_loop_white(1).mp4"
 fi
 
-# Start mpvpaper with IPC socket enabled
-/home/ablag/.local/bin/mpvpaper -o "no-audio loop hwdec=auto input-ipc-server=/tmp/mpvpaper.sock" '*' "$WALLPAPER" &
+# Start mpvpaper with IPC socket enabled and panscan=1.0 to fill screen without black bars
+/home/ablag/.local/bin/mpvpaper -o "no-audio loop hwdec=auto panscan=1.0 input-ipc-server=/tmp/mpvpaper.sock" '*' "$WALLPAPER" &
 MPV_PID=$!
 
 # Start pause controller
