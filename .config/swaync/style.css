@@ -1,0 +1,165 @@
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font Propo", "JetBrainsMono NFP", "DejaVu Sans Mono", monospace;
+  font-size: 11px;
+}
+
+/* Floating Notification Window */
+.notification-row {
+  outline: none;
+  margin: 4px 0px;
+  padding: 0;
+}
+
+.notification-row .notification-background {
+  padding: 4px 8px;
+}
+
+.notification-row .notification-background .notification {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0px;
+  padding: 10px 12px;
+  color: #000000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.notification-row .notification-background .notification.critical {
+  border: 1px solid #d20f39;
+}
+
+.notification-row .notification-background .notification .notification-content {
+  margin: 0;
+}
+
+.notification-row .notification-background .notification .summary {
+  font-size: 12px;
+  font-weight: 800;
+  color: #000000;
+  padding-bottom: 2px;
+}
+
+.notification-row .notification-background .notification .time {
+  font-size: 10px;
+  color: rgba(0, 0, 0, 0.4);
+  font-weight: 500;
+  margin-right: 20px;
+}
+
+.notification-row .notification-background .notification .body {
+  font-size: 11px;
+  color: rgba(0, 0, 0, 0.75);
+  padding-top: 2px;
+}
+
+.notification-row .notification-background .close-button {
+  background: transparent;
+  color: rgba(0, 0, 0, 0.4);
+  border: none;
+  border-radius: 0px;
+  min-width: 18px;
+  min-height: 18px;
+  font-size: 12px;
+  margin-top: 2px;
+  margin-right: 2px;
+}
+
+.notification-row .notification-background .close-button:hover {
+  background: #000000;
+  color: #ffffff;
+}
+
+/* Control Center */
+.control-center {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0px;
+  padding: 12px 14px;
+  color: #000000;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+/* Blank / Empty Text */
+.placeholder {
+  color: rgba(0, 0, 0, 0.35);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin: 30px 0;
+}
+
+/* Widget: Title */
+.widget-title {
+  padding: 0;
+  margin-bottom: 8px;
+}
+
+.widget-title > label {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #000000;
+}
+
+.widget-title > button {
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 0px;
+  color: #000000;
+  font-size: 10px;
+  font-weight: 700;
+  padding: 3px 8px;
+}
+
+.widget-title > button:hover {
+  background: #000000;
+  color: #ffffff;
+  border-color: #000000;
+}
+
+/* Widget: DND */
+.widget-dnd {
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 6px 0;
+  margin-bottom: 10px;
+}
+
+.widget-dnd > label {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
+}
+
+.widget-dnd > switch {
+  background: #e5e5e5;
+  border-radius: 0px;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+}
+
+.widget-dnd > switch:checked {
+  background: #000000;
+  border-color: #000000;
+}
+
+.widget-dnd > switch slider {
+  background: #ffffff;
+  border-radius: 0px;
+  min-width: 12px;
+  min-height: 12px;
+}
+
+/* Scrollbar */
+scrollbar {
+  background: transparent;
+  width: 4px;
+}
+
+scrollbar slider {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 0px;
+}
+
+scrollbar slider:hover {
+  background: rgba(0, 0, 0, 0.5);
+}
