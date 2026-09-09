@@ -35,6 +35,7 @@
     "clock": {
         "format": "{:%H\n%M}",
         "interval": 1,
+        "on-click": "/home/ablag/.config/waybar/scripts/calendar_popup.py",
         "tooltip-format": "<tt>{calendar}</tt>",
         "calendar": {
             "format": {
