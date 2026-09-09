@@ -27,3 +27,4 @@ src/
 *.webm
 # Compiled binaries
 .config/hypr/scripts/donut
+.config/hypr/scripts/cava_bars
