@@ -28,8 +28,8 @@ int main(void) {
             float m = cosf(B), n = sinf(B);
             float D = 1.0f / (c * h * e + f * g + 5.0f);
             float tr = c * h * g - f * e;
-            int x = (int)((WIDTH / 2.0f) + 30.0f * D * (l * h * m - tr * n));
-            int y = (int)((HEIGHT / 2.0f) + 15.0f * D * (l * h * n + tr * m));
+            int x = (int)((WIDTH / 2.0f) + 27.0f * D * (l * h * m - tr * n));
+            int y = (int)((HEIGHT / 2.0f) + 13.0f * D * (l * h * n + tr * m));
             int o = x + WIDTH * y;
             int N = (int)(8.0f * ((f * e - c * d * g) * m - c * d * e - f * g - l * d * n));
             if (y >= 0 && y < HEIGHT && x >= 0 && x < WIDTH && D > z[o]) {
@@ -40,8 +40,13 @@ int main(void) {
         }
     }
 
-    char out_buf[(WIDTH + 1) * HEIGHT + 1];
+    char out_buf[16 + (WIDTH + 1) * HEIGHT + 1];
     int idx = 0;
+    // Zero-width space (UTF-8 0xE2 0x80 0x8B) prevents Hyprlock/Pango trimmer from stripping leading spaces
+    out_buf[idx++] = (char)0xE2;
+    out_buf[idx++] = (char)0x80;
+    out_buf[idx++] = (char)0x8B;
+
     for (int y = 0; y < HEIGHT; y++) {
         memcpy(&out_buf[idx], &b[y * WIDTH], WIDTH);
         idx += WIDTH;
