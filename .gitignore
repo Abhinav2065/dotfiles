@@ -21,5 +21,8 @@ pkg/
 src/
 *.pkg.tar.*
 
-# Node modules
-node_modules/
+# Video files (too large for git)
+*.mp4
+*.mkv
+*.webm
+
