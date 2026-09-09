@@ -25,4 +25,5 @@ src/
 *.mp4
 *.mkv
 *.webm
-
+# Compiled binaries
+.config/hypr/scripts/donut
