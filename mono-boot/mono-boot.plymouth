@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Mono Boot
+Description=Minimalist monochrome black & white boot theme matching Hyprlock and Waybar
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/mono-boot
+ScriptFile=/usr/share/plymouth/themes/mono-boot/mono-boot.script
