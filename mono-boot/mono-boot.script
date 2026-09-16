@@ -1,0 +1,236 @@
+# ==============================================================================
+# Mono Boot (Donut Edition) - Minimalist Monochrome Plymouth Theme
+# Aesthetic Black & White theme matching Hyprlock (3D ASCII Donut) and Waybar
+# ==============================================================================
+
+# Stark pure white background
+Window.SetBackgroundTopColor(1.0, 1.0, 1.0);
+Window.SetBackgroundBottomColor(1.0, 1.0, 1.0);
+
+screen_width = Window.GetWidth();
+screen_height = Window.GetHeight();
+center_x = Math.Int(screen_width / 2);
+center_y = Math.Int(screen_height / 2);
+
+# ------------------------------------------------------------------------------
+# 1. Corner Minimal Accents (matching Hyprlock & Waybar)
+# ------------------------------------------------------------------------------
+tag_left_img = Image("tag_left.png");
+tag_left_sprite = Sprite(tag_left_img);
+tag_left_sprite.SetPosition(48, 48, 5);
+
+tag_right_img = Image("tag_right.png");
+tag_right_sprite = Sprite(tag_right_img);
+tag_right_sprite.SetPosition(Math.Int(screen_width - tag_right_img.GetWidth() - 48), 48, 5);
+
+tag_bot_img = Image("tag_bottom.png");
+tag_bot_sprite = Sprite(tag_bot_img);
+tag_bot_sprite.SetPosition(Math.Int(center_x - (tag_bot_img.GetWidth() / 2)), Math.Int(screen_height - 60), 5);
+
+# ------------------------------------------------------------------------------
+# 2. Central 3D Rotating ASCII Donut (Exact match with Hyprlock)
+# ------------------------------------------------------------------------------
+NUM_DONUT_FRAMES = 36;
+for (i = 0; i < NUM_DONUT_FRAMES; i++)
+  {
+    if (i < 10)
+      prefix = "0";
+    else
+      prefix = "";
+    donut_images[i] = Image("donut_frames/donut_" + prefix + i + ".png");
+  }
+
+donut_sprite = Sprite(donut_images[0]);
+donut_w = donut_images[0].GetWidth();
+donut_h = donut_images[0].GetHeight();
+donut_x = Math.Int(center_x - (donut_w / 2));
+donut_y = Math.Int(center_y - (donut_h / 2) - 40);
+donut_sprite.SetPosition(donut_x, donut_y, 10);
+
+# ------------------------------------------------------------------------------
+# 3. Minimal Progress Bar (1px border, 0px rounding, pure black fill)
+# ------------------------------------------------------------------------------
+box_image = Image("progress_box.png");
+box_sprite = Sprite(box_image);
+box_w = box_image.GetWidth();  # 280
+box_h = box_image.GetHeight(); # 6
+box_x = Math.Int(center_x - (box_w / 2));
+box_y = Math.Int(donut_y + donut_h + 35);
+box_sprite.SetPosition(box_x, box_y, 10);
+
+bar_orig = Image("progress_bar.png");
+bar_sprite = Sprite();
+bar_max_w = bar_orig.GetWidth(); # 278
+bar_h = bar_orig.GetHeight();    # 4
+bar_x = box_x + 1;
+bar_y = box_y + 1;
+bar_sprite.SetPosition(bar_x, bar_y, 11);
+
+# Indeterminate shimmer pulse
+pulse_orig = Image("progress_pulse.png");
+pulse_sprite = Sprite(pulse_orig);
+pulse_w = pulse_orig.GetWidth();
+pulse_sprite.SetPosition(bar_x, bar_y, 12);
+pulse_sprite.SetOpacity(0);
+
+current_progress = 0.0;
+tick = 0;
+
+# ------------------------------------------------------------------------------
+# 4. Status Message (Clean single-line in DejaVu Sans Mono / Charcoal Gray)
+# ------------------------------------------------------------------------------
+status_sprite = Sprite();
+status_y = box_y + box_h + 18;
+
+fun clean_text (raw)
+  {
+    if (!raw || raw == "") return "";
+    
+    len = raw.Length();
+    if (raw.CharAt(0) == "[")
+      {
+        idx = 0;
+        for (i = 0; i < len; i++)
+          {
+            if (raw.CharAt(i) == "]")
+              {
+                idx = i + 1;
+                break;
+              }
+          }
+        for (i = idx; i < len; i++)
+          {
+            if (raw.CharAt(i) != " ")
+              {
+                idx = i;
+                break;
+              }
+          }
+        return raw.SubString(idx, len - idx);
+      }
+    return raw;
+  }
+
+fun update_status (text)
+  {
+    cleaned = clean_text(text);
+    if (cleaned == "") return;
+
+    status_img = Image.Text(cleaned, 0.40, 0.40, 0.40);
+    status_sprite.SetImage(status_img);
+    status_sprite.SetPosition(Math.Int(center_x - (status_img.GetWidth() / 2)), status_y, 10);
+    status_sprite.SetOpacity(1);
+  }
+
+initial_status = "Initializing system services...";
+update_status(initial_status);
+
+# ------------------------------------------------------------------------------
+# 5. Animation Refresh Loop (60 Hz)
+# ------------------------------------------------------------------------------
+fun refresh_callback ()
+  {
+    tick++;
+
+    # Rotate donut: advance frame every 2 ticks (30 FPS rotation)
+    frame = (Math.Int(tick / 2)) % NUM_DONUT_FRAMES;
+    donut_sprite.SetImage(donut_images[frame]);
+
+    # When progress is at 0, display sleek scanning pulse
+    if (current_progress <= 0.02)
+      {
+        pulse_sprite.SetOpacity(1);
+        range = bar_max_w - pulse_w;
+        # Simple linear ping-pong: count up then down across the range
+        cycle = range * 2;
+        pos = tick % cycle;
+        if (pos > range)
+          pos = cycle - pos;
+        pulse_sprite.SetPosition(bar_x + pos, bar_y, 12);
+      }
+    else
+      {
+        pulse_sprite.SetOpacity(0);
+      }
+  }
+
+Plymouth.SetRefreshFunction(refresh_callback);
+
+# ------------------------------------------------------------------------------
+# 6. Plymouth Event Callbacks
+# ------------------------------------------------------------------------------
+fun progress_callback (duration, progress)
+  {
+    current_progress = progress;
+    fill_w = Math.Int(bar_max_w * progress);
+    if (fill_w < 1) fill_w = 1;
+    if (fill_w > bar_max_w) fill_w = bar_max_w;
+
+    bar_sprite.SetImage(bar_orig.Scale(fill_w, bar_h));
+    bar_sprite.SetOpacity(1);
+
+    if (progress >= 0.95)
+      {
+        tag_bot_img = Image.Text("[ READY ]", 0.70, 0.70, 0.70);
+        tag_bot_sprite.SetImage(tag_bot_img);
+        tag_bot_sprite.SetPosition(Math.Int(center_x - (tag_bot_img.GetWidth() / 2)), Math.Int(screen_height - 60), 5);
+      }
+  }
+
+Plymouth.SetBootProgressFunction(progress_callback);
+
+fun status_callback (status_text)
+  {
+    update_status(status_text);
+  }
+
+Plymouth.SetUpdateStatusFunction(status_callback);
+
+fun message_callback (text)
+  {
+    update_status(text);
+  }
+
+Plymouth.SetDisplayMessageFunction(message_callback);
+
+# ------------------------------------------------------------------------------
+# 7. Password Prompt Dialog (LUKS fallback)
+# ------------------------------------------------------------------------------
+pwd_dialog_active = 0;
+pwd_box_sprite = Sprite();
+
+fun display_password_callback (prompt, bullets)
+  {
+    if (!pwd_dialog_active)
+      {
+        pwd_box_img = Image("pwd_box.png");
+        pwd_box_sprite.SetImage(pwd_box_img);
+        pwd_box_sprite.SetPosition(Math.Int(center_x - (pwd_box_img.GetWidth() / 2)), Math.Int(box_y + 40), 20);
+        pwd_dialog_active = 1;
+      }
+    update_status(prompt);
+  }
+
+Plymouth.SetDisplayPasswordFunction(display_password_callback);
+
+fun display_normal_callback ()
+  {
+    if (pwd_dialog_active)
+      {
+        pwd_box_sprite.SetOpacity(0);
+        pwd_dialog_active = 0;
+      }
+  }
+
+Plymouth.SetDisplayNormalFunction(display_normal_callback);
+
+# ------------------------------------------------------------------------------
+# 8. Quit Callback
+# ------------------------------------------------------------------------------
+fun quit_callback ()
+  {
+    donut_sprite.SetOpacity(1);
+    bar_sprite.SetOpacity(1);
+  }
+
+Plymouth.SetQuitFunction(quit_callback);
