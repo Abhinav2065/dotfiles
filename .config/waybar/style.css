@@ -77,6 +77,7 @@ tooltip label {
 /* Bottom Action Buttons */
 #pulseaudio,
 #custom-notifications,
+#custom-mode,
 #custom-power {
     background: transparent;
     border: none;
@@ -85,14 +86,23 @@ tooltip label {
     font-size: 15px;
     padding: 12px 0;
     margin: 0;
-    transition: opacity 0.15s ease;
+    transition: opacity 0.15s ease, color 0.15s ease;
 }
 
 #pulseaudio:hover,
 #custom-notifications:hover,
+#custom-mode:hover,
 #custom-power:hover {
     opacity: 0.5;
     background: transparent;
+}
+
+#custom-mode.pc {
+    color: #000000;
+}
+
+#custom-mode.server {
+    color: #0066cc;
 }
 
 #pulseaudio.muted {

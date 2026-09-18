@@ -13,7 +13,7 @@
     ],
 
     "modules-right": [
-        "tray", "pulseaudio", "custom/notifications", "custom/power"
+        "tray", "pulseaudio", "custom/notifications", "custom/mode", "custom/power"
     ],
 
     "hyprland/workspaces": {
@@ -62,15 +62,25 @@
         "interval": 0
     },
 
+    "custom/mode": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "/home/ablag/.config/waybar/scripts/laptop-mode.sh status",
+        "on-click": "/home/ablag/.config/waybar/scripts/laptop-mode.sh toggle",
+        "signal": 8,
+        "interval": 3,
+        "tooltip": true
+    },
+
     "custom/power": {
         "format": "⏻",
         "tooltip": false,
         "menu": "on-click",
         "menu-file": "/home/ablag/.config/waybar/power_menu.xml",
         "menu-actions": {
-            "poweroff": "true",
-            "restart": "true",
-            "server-mode": "true"
+            "poweroff": "systemctl poweroff",
+            "restart": "systemctl reboot",
+            "toggle-mode": "/home/ablag/.config/waybar/scripts/laptop-mode.sh toggle"
         }
     }
 }
