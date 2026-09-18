@@ -28,3 +28,6 @@ src/
 # Compiled binaries
 .config/hypr/scripts/donut
 .config/hypr/scripts/cava_bars
+
+# Graphify
+graphify-out/
