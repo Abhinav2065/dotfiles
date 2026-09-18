@@ -13,21 +13,32 @@ if [[ -f "$STATE_FILE" ]]; then
     MODE="$(cat "$STATE_FILE" | tr -d '[:space:]')"
 fi
 
+lock_screen() {
+    if ! pidof hyprlock >/dev/null 2>&1; then
+        hyprlock &
+    fi
+}
+
 case "$ACTION" in
     close)
+        # Always lock screen when lid closes
+        lock_screen
+        sleep 0.3
+
         if [[ "$MODE" == "server" ]]; then
-            # Server Mode: Turn screen off, laptop stays running 100%
+            # Server Mode: Turn screen off, keep processes running 100%
             hyprctl dispatch dpms off
         else
-            # PC Mode: Turn off screen, lock, and suspend
+            # PC Mode: Turn off screen and suspend
             hyprctl dispatch dpms off
-            pidof hyprlock >/dev/null 2>&1 || hyprlock &
             systemctl suspend
         fi
         ;;
     open)
         # Turn display back on
         hyprctl dispatch dpms on
+        # Guarantee that opening the lid presents the lockscreen
+        lock_screen
         ;;
     *)
         echo "Usage: $0 [close|open]"

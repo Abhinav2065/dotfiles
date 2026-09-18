@@ -1,11 +1,2 @@
-#!/bin/bash
-# /* ---- 💫 https://github.com/JaKooLit 💫 ---- */  ##
-# For Swaylock
-
-CONFIG="$HOME/.config/swaylock/config"
-
-# sleep 0.5s; swaylock --config ${CONFIG} & disown
-
-sleep 0.5s
-gtklock -i &
-disown
+#!/usr/bin/env bash
+pidof hyprlock >/dev/null 2>&1 || hyprlock &
