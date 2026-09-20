@@ -26,15 +26,28 @@ stop_inhibitor() {
         fi
         rm -f "$PID_FILE"
     fi
+    pkill -f "systemd-inhibit.*LaptopMode" 2>/dev/null || true
     pkill -f "systemd-inhibit.*ServerMode" 2>/dev/null || true
+    pkill -f "systemd-inhibit.*PCMode" 2>/dev/null || true
 }
 
 start_inhibitor() {
+    local mode="$1"
     stop_inhibitor
-    nohup systemd-inhibit --what=handle-lid-switch:idle --who="ServerMode" --why="Server Mode active" sleep infinity >/dev/null 2>&1 &
-    local pid=$!
-    disown "$pid" 2>/dev/null || true
-    echo "$pid" > "$PID_FILE"
+
+    if [[ "$mode" == "server" ]]; then
+        # Server Mode: Inhibit both lid-switch and idle so system never sleeps or dims
+        setsid systemd-inhibit --what=handle-lid-switch:idle --who="LaptopMode-Server" --why="Server Mode active" sleep infinity >/dev/null 2>&1 &
+        local pid=$!
+        disown "$pid" 2>/dev/null || true
+        echo "$pid" > "$PID_FILE"
+    else
+        # PC Mode: Inhibit lid-switch from logind so Hyprland's lid-handler.sh has exclusive control of the lid close action (locking hyprlock first, then suspending cleanly)
+        setsid systemd-inhibit --what=handle-lid-switch --who="LaptopMode-PC" --why="PC Mode lid handler active" sleep infinity >/dev/null 2>&1 &
+        local pid=$!
+        disown "$pid" 2>/dev/null || true
+        echo "$pid" > "$PID_FILE"
+    fi
 }
 
 set_mode() {
@@ -49,24 +62,25 @@ set_mode() {
         brightnessctl -r 2>/dev/null || true
         hyprctl dispatch dpms on 2>/dev/null || true
         # Inhibit logind lid switch and idle
-        start_inhibitor
+        start_inhibitor "server"
         if [[ "$silent" != "silent" ]]; then
-            notify-send -u normal -i server-database "Laptop Mode" "Switched to Server Mode\n• Screen stays on 100% while open\n• Screen turns off on lid close (no sleep)" 2>/dev/null || true
+            notify-send -u normal -i server-database "Laptop Mode" "Switched to Server Mode\n• Screen stays on 100% while open\n• Screen turns off on lid close (laptop keeps running)" 2>/dev/null || true
         fi
     else
         echo "pc" > "$STATE_FILE"
-        # Stop Server Mode inhibitor so logind can handle suspend
-        stop_inhibitor
+        # Inhibit logind lid-switch so lid-handler controls hyprlock + suspend cleanly
+        start_inhibitor "pc"
         # Start hypridle if installed
         if command -v hypridle >/dev/null 2>&1; then
             if ! pgrep -x hypridle >/dev/null; then
-                hypridle &
+                setsid hypridle >/dev/null 2>&1 &
+                disown 2>/dev/null || true
             fi
         fi
         # Ensure display is on
         hyprctl dispatch dpms on 2>/dev/null || true
         if [[ "$silent" != "silent" ]]; then
-            notify-send -u normal -i computer "Laptop Mode" "Switched to PC Mode\n• Screen dims after 1m, locks after 2m\n• Suspends on lid close" 2>/dev/null || true
+            notify-send -u normal -i computer "Laptop Mode" "Switched to PC Mode\n• Screen dims after 1m, locks after 2m\n• Lid close locks screen & suspends (keeps session intact)" 2>/dev/null || true
         fi
     fi
 
@@ -79,11 +93,11 @@ output_status_json() {
     mode="$(get_current_mode)"
     if [[ "$mode" == "server" ]]; then
         cat <<EOF
-{"text":"󰒋","alt":"server","tooltip":"Mode: Server Mode\\n• Lid Close: Screen off only (laptop keeps running)\\n• Lid Open: Screen 100% on (no dimming/sleep)\\n\\nClick to switch to PC Mode","class":"server"}
+{"text":"󰒋","alt":"server","tooltip":"Mode: Server Mode\\n• Lid Close: Screen off only (laptop keeps running)\\n• Lid Open: Screen stays on 100%\\n\\nClick to switch to PC Mode","class":"server"}
 EOF
     else
         cat <<EOF
-{"text":"󰌢","alt":"pc","tooltip":"Mode: PC Mode (Normal)\\n• Lid Close: Turn off & Sleep (Suspend)\\n• Idle 1m: Dim screen to 10%\\n• Idle 2m: Turn off screen & Lock\\n\\nClick to switch to Server Mode","class":"pc"}
+{"text":"󰌢","alt":"pc","tooltip":"Mode: PC Mode (Normal)\\n• Lid Close: Lock screen & Suspend (keeps session intact)\\n• Idle 1m: Dim screen to 10%\\n• Idle 2m: Lock & turn screen off\\n\\nClick to switch to Server Mode","class":"pc"}
 EOF
     fi
 }

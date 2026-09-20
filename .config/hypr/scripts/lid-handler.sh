@@ -21,24 +21,28 @@ lock_screen() {
 
 case "$ACTION" in
     close)
-        # Always lock screen when lid closes
-        lock_screen
-        sleep 0.3
-
         if [[ "$MODE" == "server" ]]; then
-            # Server Mode: Turn screen off, keep processes running 100%
+            # Server Mode: Turn off display only, keep all processes and servers running 100%
             hyprctl dispatch dpms off
         else
-            # PC Mode: Turn off screen and suspend
+            # PC Mode:
+            # 1. Lock screen with hyprlock (the ctrl+L lock screen)
+            lock_screen
+            # 2. Wait briefly for hyprlock to establish its lock surface before suspend
+            sleep 0.5
+            # 3. Turn off screen
             hyprctl dispatch dpms off
+            # 4. Suspend system (preserves all existing applications, windows, and session state)
             systemctl suspend
         fi
         ;;
     open)
         # Turn display back on
         hyprctl dispatch dpms on
-        # Guarantee that opening the lid presents the lockscreen
-        lock_screen
+        if [[ "$MODE" != "server" ]]; then
+            # Ensure lock screen is active on resume in PC mode
+            lock_screen
+        fi
         ;;
     *)
         echo "Usage: $0 [close|open]"
